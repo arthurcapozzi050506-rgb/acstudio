@@ -17,7 +17,7 @@ const PROJECTS: Project[] = [
   {
     titulo: "Febre Amarela",
     descricao: "Blog de informação em saúde — \"Informação que protege\". Projeto autoral de conteúdo e desenvolvimento web, do zero à publicação.",
-    imagem: "https://s0.wp.com/mshots/v1/https%3A%2F%2Ffebreamarela.blog%2F?w=1280&h=800",
+    imagem: "https://drive.google.com/thumbnail?id=129WTXW6jNnpRWs11olEq-ODcKahpifDx&sz=w1280",
     link: "https://febreamarela.blog/",
     tags: ["Blog", "Conteúdo", "Web design"]
   },

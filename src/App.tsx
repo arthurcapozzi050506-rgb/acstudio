@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext } from 'react';
+import { useEffect, useRef, useState, useContext, useMemo, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import PROJECTS from './data/projects';
@@ -41,8 +41,15 @@ function Navigation() {
   const { t } = useTranslation();
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 80);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 80);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -362,7 +369,7 @@ function Stats() {
 }
 
 // ============================================================
-// SOBRE — STORYTELLING
+// SOBRE — STORYTELLING (OTIMIZADO)
 // ============================================================
 function Sobre() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -374,6 +381,7 @@ function Sobre() {
   useEffect(() => {
     if (!sectionRef.current) return;
 
+    // Mobile: animação simples de entrada
     if (window.matchMedia('(max-width: 767px)').matches) {
       const chapterEls = sectionRef.current.querySelectorAll('.story-chapter');
       chapterEls.forEach((el) => {
@@ -392,26 +400,36 @@ function Sobre() {
       return;
     }
 
-    const totalHeight = chapters.length;
-
-    ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top top',
-      end: `+=${totalHeight * 60}vh`,
-      pin: true,
-      scrub: 0.5,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        const chapterIndex = Math.min(
-          Math.floor(progress * totalHeight),
-          totalHeight - 1
-        );
-        setActiveChapter(chapterIndex);
+    // Desktop: Intersection Observer (performático)
+    const chapterEls = sectionRef.current.querySelectorAll('.story-chapter');
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Array.from(chapterEls).indexOf(entry.target as Element);
+            if (index !== -1) {
+              setActiveChapter(index);
+            }
+          }
+        });
       },
-    });
+      {
+        threshold: 0.5,
+        rootMargin: '-20% 0px -20% 0px',
+      }
+    );
+
+    chapterEls.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
   }, []);
 
-  const progressPercent = ((activeChapter + 1) / chapters.length) * 100;
+  // Memoizar cálculo para evitar re-renders desnecessários
+  const progressPercent = useMemo(
+    () => ((activeChapter + 1) / chapters.length) * 100,
+    [activeChapter, chapters.length]
+  );
 
   return (
     <section
@@ -431,8 +449,8 @@ function Sobre() {
             </p>
             <div className="hidden lg:block mt-8 w-full h-1 bg-white/5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
+                className="progress-bar-fill h-full w-full bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full"
+                style={{ transform: `scaleX(${progressPercent / 100})` }}
               />
             </div>
           </div>
@@ -836,8 +854,15 @@ function WhatsAppButton() {
   const { lang } = useContext(AppContext);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setVisible(window.scrollY > 300);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setVisible(window.scrollY > 300);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);

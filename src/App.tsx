@@ -374,9 +374,20 @@ function Stats() {
 function Sobre() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const { t } = useTranslation();
 
   const chapters = t('sobre.chapters');
+
+  // Detectar viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -459,7 +470,7 @@ function Sobre() {
             {chapters.map((chapter: any, i: number) => (
               <div
                 key={i}
-                className={`story-chapter transition-opacity duration-500 ${i === activeChapter ? 'opacity-100' : 'opacity-30'}`}
+                className={`story-chapter transition-opacity duration-500 ${isMobile || i === activeChapter ? 'opacity-100' : 'opacity-30'}`}
               >
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-4xl font-bold gradient-text">{chapter.number}</span>

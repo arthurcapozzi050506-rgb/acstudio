@@ -335,11 +335,6 @@ body {
   will-change: transform;
 }
 
-/* Chapters com contain para isolar repaints */
-.story-chapter {
-  contain: layout style paint;
-}
-
 /* Remover will-change de elementos estáticos para liberar GPU memory */
 @media (prefers-reduced-motion: reduce) {
   .story-chapter,
@@ -369,6 +364,14 @@ body {
 .story-chapter {
   transition: opacity 0.5s ease, transform 0.5s ease;
   will-change: opacity, transform;
+  contain: layout style paint;
+}
+
+/* No mobile, sempre visível (opacity-100) */
+@media (max-width: 1023px) {
+  .story-chapter {
+    opacity: 1 !important;
+  }
 }
 
 /* Progress bar — usar transform em vez de width para performance */

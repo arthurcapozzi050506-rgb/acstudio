@@ -321,6 +321,34 @@ body {
   }
 }
 
+/* ============================================================
+   Performance Optimizations
+   ============================================================ */
+
+/* Contain para isolar seções e evitar reflows globais */
+.section-padding {
+  contain: layout style;
+}
+
+/* Otimizar sticky elements */
+.lg\:sticky {
+  will-change: transform;
+}
+
+/* Chapters com contain para isolar repaints */
+.story-chapter {
+  contain: layout style paint;
+}
+
+/* Remover will-change de elementos estáticos para liberar GPU memory */
+@media (prefers-reduced-motion: reduce) {
+  .story-chapter,
+  .lg\:sticky,
+  .progress-bar-fill {
+    will-change: auto;
+  }
+}
+
 /* Empty state */
 .empty-state-border {
   border: 2px dashed rgba(255, 255, 255, 0.12);
@@ -337,16 +365,17 @@ body {
   color: #64D2FF;
 }
 
-/* Storytelling chapters */
-.chapter {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+/* Storytelling chapters — otimizado para performance */
+.story-chapter {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  will-change: opacity, transform;
 }
 
-.chapter.active {
-  opacity: 1;
-  transform: translateY(0);
+/* Progress bar — usar transform em vez de width para performance */
+.progress-bar-fill {
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 /* Counter animation */

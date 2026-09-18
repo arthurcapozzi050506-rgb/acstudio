@@ -44,9 +44,21 @@
     
     <style>
       html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; }
-      body { background-color: #000000; color: #f5f5f7; }
+      body { background-color: #000000; color: #f5f5f7; transition: background-color 0.3s ease, color 0.3s ease; }
       #root { min-height: 100vh; }
     </style>
+    <script>
+      // Aplicar tema imediatamente para evitar flash
+      (function() {
+        const saved = localStorage.getItem('ac-studio-theme');
+        const theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+        if (theme === 'light') {
+          document.body.style.backgroundColor = '#ffffff';
+          document.body.style.color = '#1d1d1f';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

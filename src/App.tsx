@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useContext } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import PROJECTS from './data/projects';
+import { AppProvider, AppContext } from './contexts/AppContext';
+import { useTranslation } from './i18n/useTranslation';
+import { ThemeToggle } from './components/ThemeToggle';
+import { LanguageSelector } from './components/LanguageSelector';
 
 // ============================================================
 // ✏️ EDITAR AQUI: Configurações do site
 // ============================================================
 const WHATSAPP_NUMBER = '5519995362190'; // ✏️ EDITAR AQUI: número do WhatsApp — +55 (19) 99536-2190
-const WHATSAPP_MESSAGE = encodeURIComponent('Olá, Arthur! Vim pelo site do AC Studio e quero conversar sobre um projeto.');
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+const WHATSAPP_MESSAGE_PT = encodeURIComponent('Olá, Arthur! Vim pelo site do AC Studio e quero conversar sobre um projeto.');
+const WHATSAPP_MESSAGE_EN = encodeURIComponent('Hi Arthur! I came from the AC Studio website and I want to talk about a project.');
 const EMAIL = 'contato@acstudio.com.br'; // ✏️ EDITAR AQUI: e-mail
 
 // Redes sociais
@@ -17,6 +21,12 @@ const SOCIAL = {
   linkedin: '#',  // ✏️ EDITAR AQUI: link do LinkedIn
   github: '#',    // ✏️ EDITAR AQUI: link do GitHub
 };
+
+// Helper para URL do WhatsApp baseada no idioma
+function getWhatsAppUrl(lang: 'pt' | 'en'): string {
+  const message = lang === 'pt' ? WHATSAPP_MESSAGE_PT : WHATSAPP_MESSAGE_EN;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+}
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,6 +37,8 @@ function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('inicio');
+  const { lang } = useContext(AppContext);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,11 +70,11 @@ function Navigation() {
   }, []);
 
   const navLinks = [
-    { id: 'inicio', label: 'Início' },
-    { id: 'sobre', label: 'Sobre' },
-    { id: 'servicos', label: 'Serviços' },
-    { id: 'projetos', label: 'Projetos' },
-    { id: 'contato', label: 'Contato' },
+    { id: 'inicio', label: t('nav.inicio') },
+    { id: 'sobre', label: t('nav.sobre') },
+    { id: 'servicos', label: t('nav.servicos') },
+    { id: 'projetos', label: t('nav.projetos') },
+    { id: 'contato', label: t('nav.contato') },
   ];
 
   return (
@@ -80,7 +92,7 @@ function Navigation() {
             <span className="text-text-primary font-semibold text-lg hidden sm:block">AC Studio</span>
           </a>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <a
                 key={link.id}
@@ -94,26 +106,34 @@ function Navigation() {
                 {link.label}
               </a>
             ))}
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <LanguageSelector />
+            </div>
             <a
-              href={WHATSAPP_URL}
+              href={getWhatsAppUrl(lang)}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-shine px-5 py-2.5 rounded-full bg-gradient-to-r from-brand-indigo to-brand-cyan text-white text-sm font-medium hover:opacity-90 transition-opacity"
             >
-              Iniciar projeto
+              {t('nav.iniciarProjeto')}
             </a>
           </div>
 
-          <button
-            className="md:hidden flex flex-col gap-1.5 p-2"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
-            aria-expanded={mobileOpen}
-          >
-            <span className={`w-6 h-0.5 bg-text-primary transition-transform ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`w-6 h-0.5 bg-text-primary transition-opacity ${mobileOpen ? 'opacity-0' : ''}`} />
-            <span className={`w-6 h-0.5 bg-text-primary transition-transform ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-          </button>
+          <div className="flex items-center gap-3 md:hidden">
+            <ThemeToggle />
+            <LanguageSelector />
+            <button
+              className="flex flex-col gap-1.5 p-2"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={mobileOpen}
+            >
+              <span className={`w-6 h-0.5 bg-text-primary transition-transform ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
+              <span className={`w-6 h-0.5 bg-text-primary transition-opacity ${mobileOpen ? 'opacity-0' : ''}`} />
+              <span className={`w-6 h-0.5 bg-text-primary transition-transform ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -130,13 +150,13 @@ function Navigation() {
             </a>
           ))}
           <a
-            href={WHATSAPP_URL}
+            href={getWhatsAppUrl(lang)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setMobileOpen(false)}
             className="mt-4 px-8 py-3 rounded-full bg-gradient-to-r from-brand-indigo to-brand-cyan text-white font-medium"
           >
-            Iniciar projeto
+            {t('nav.iniciarProjeto')}
           </a>
         </div>
       </div>
@@ -150,6 +170,8 @@ function Navigation() {
 function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const browserRef = useRef<HTMLDivElement>(null);
+  const { lang } = useContext(AppContext);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -188,33 +210,33 @@ function Hero() {
 
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <p className="hero-eyebrow text-text-secondary text-sm md:text-base tracking-wide uppercase mb-6">
-          Desenvolvimento · Design · Inteligência Artificial
+          {t('hero.eyebrow')}
         </p>
 
         <h1 className="hero-title heading-xl mb-6">
-          Inteligência para <span className="gradient-text">criar</span>.
+          {t('hero.title1')} <span className="gradient-text">{t('hero.title2')}</span>.
           <br />
-          Dedicação para <span className="gradient-text">transformar</span>.
+          {t('hero.title3')} <span className="gradient-text">{t('hero.title4')}</span>.
         </h1>
 
         <p className="hero-subtitle text-text-secondary text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
-          Sites, lojas virtuais e experiências digitais que aproximam sua empresa de quem precisa conhecê-la — com estratégia, design e IA aplicada com revisão humana.
+          {t('hero.subtitle')}
         </p>
 
         <div className="hero-ctas flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <a
-            href={WHATSAPP_URL}
+            href={getWhatsAppUrl(lang)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-shine px-8 py-4 rounded-full bg-gradient-to-r from-brand-indigo to-brand-cyan text-white font-semibold text-base hover:opacity-90 transition-opacity"
           >
-            Iniciar um projeto
+            {t('hero.ctaPrimary')}
           </a>
           <a
             href="#projetos"
             className="px-8 py-4 rounded-full border border-white/20 text-text-primary font-medium text-base hover:border-white/40 hover:bg-white/5 transition-all"
           >
-            Ver projetos
+            {t('hero.ctaSecondary')}
           </a>
         </div>
 
@@ -247,7 +269,7 @@ function Hero() {
       </div>
 
       <div className="scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-text-secondary">
-        <span className="text-xs uppercase tracking-wider">Role para explorar</span>
+        <span className="text-xs uppercase tracking-wider">{t('hero.scrollIndicator')}</span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="opacity-60">
           <path d="M10 4v12m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -260,7 +282,9 @@ function Hero() {
 // MARQUEE
 // ============================================================
 function Marquee() {
-  const items = 'Sites · E-commerce · Blogs · Landing pages · Identidade visual · IA com revisão humana · ';
+  const { t } = useTranslation();
+  const items = t('marquee.items');
+  
   return (
     <div className="marquee-container border-y border-white/5 bg-bg-secondary">
       <div className="marquee-content">
@@ -281,11 +305,12 @@ function Stats() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [counts, setCounts] = useState([0, 0, 0]);
   const hasAnimated = useRef(false);
+  const { t } = useTranslation();
 
   const stats = [
-    { value: 15, suffix: '+', label: 'projetos construídos' },
-    { value: 100, suffix: '%', label: 'dos entregáveis com revisão humana' },
-    { value: 3, suffix: '', label: 'pilares: estratégia, design e tecnologia' },
+    { value: 15, suffix: '+', label: t('stats.stat1.label') },
+    { value: 100, suffix: '%', label: t('stats.stat2.label') },
+    { value: 3, suffix: '', label: t('stats.stat3.label') },
   ];
 
   useEffect(() => {
@@ -342,29 +367,9 @@ function Stats() {
 function Sobre() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
+  const { t } = useTranslation();
 
-  const chapters = [
-    {
-      number: '01',
-      title: 'Onde tudo começou',
-      text: 'O AC Studio nasceu de uma percepção simples: em um mundo hiperconectado, muitas empresas ainda têm uma presença digital fraca, distante do valor que realmente entregam. Antes de atender clientes, foram 15+ projetos pessoais — cada um uma oportunidade de aprender, testar ideias e transformar conceitos em experiências digitais concretas.',
-    },
-    {
-      number: '02',
-      title: 'O desafio',
-      text: 'Bons produtos, bons serviços e boas histórias que o digital não consegue contar. Um site desatualizado ou uma experiência confusa fazem uma marca perder credibilidade e oportunidades — mesmo quando existe qualidade por trás dela.',
-    },
-    {
-      number: '03',
-      title: 'A virada',
-      text: 'A inteligência artificial acelerou tudo: mais velocidade, mais ideias, projetos sofisticados mais acessíveis. Mas a verdadeira virada é usá-la com responsabilidade — sem aceitar resultado automático, sem perder o olhar humano.',
-    },
-    {
-      number: '04',
-      title: 'O que nos move',
-      text: 'Cada projeto começa com escuta, entendimento e parceria. Preguiça não é uma opção: curiosidade para aprender, disciplina para executar e responsabilidade para revisar cada resultado.',
-    },
-  ];
+  const chapters = t('sobre.chapters');
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -417,12 +422,12 @@ function Sobre() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           <div className="lg:sticky lg:top-32">
-            <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">Nossa história</p>
+            <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">{t('sobre.eyebrow')}</p>
             <h2 className="heading-lg mb-6">
-              A história por trás do <span className="gradient-text">AC Studio</span>
+              {t('sobre.title')} <span className="gradient-text">{t('sobre.titleHighlight')}</span>
             </h2>
             <p className="text-text-secondary text-lg leading-relaxed">
-              Ajudar empresas a ocupar seu espaço no digital com mais clareza, personalidade e confiança — transformando ideias e negócios em marcas percebidas, compreendidas e lembradas.
+              {t('sobre.subtitle')}
             </p>
             <div className="hidden lg:block mt-8 w-full h-1 bg-white/5 rounded-full overflow-hidden">
               <div
@@ -433,7 +438,7 @@ function Sobre() {
           </div>
 
           <div className="space-y-12 lg:space-y-16">
-            {chapters.map((chapter, i) => (
+            {chapters.map((chapter: any, i: number) => (
               <div
                 key={i}
                 className={`story-chapter transition-opacity duration-500 ${i === activeChapter ? 'opacity-100' : 'opacity-30'}`}
@@ -459,15 +464,9 @@ function Sobre() {
 // ============================================================
 function Servicos() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
-  const services = [
-    { icon: '🌐', title: 'Sites profissionais', desc: 'Presença digital moderna, rápida e coerente com a sua marca.' },
-    { icon: '🛒', title: 'Lojas virtuais', desc: 'E-commerce pensado para vender, do catálogo ao checkout.' },
-    { icon: '📝', title: 'Blogs e conteúdo', desc: 'Estrutura pronta para publicar e ser encontrado no Google.' },
-    { icon: '🚀', title: 'Páginas de lançamento', desc: 'Landing pages focadas em uma única ação: converter.' },
-    { icon: '🎨', title: 'Identidade visual', desc: 'Marca, cores e tipografia em um sistema visual consistente.' },
-    { icon: '🤖', title: 'IA aplicada com critério', desc: 'Produtividade e personalização, sempre com revisão humana.' },
-  ];
+  const services = t('servicos.cards');
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -490,17 +489,17 @@ function Servicos() {
     <section id="servicos" ref={sectionRef} className="section-padding bg-bg-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">O que fazemos</p>
+          <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">{t('servicos.eyebrow')}</p>
           <h2 className="heading-lg mb-4">
-            Soluções digitais <span className="gradient-text">completas</span>
+            {t('servicos.title')} <span className="gradient-text">{t('servicos.titleHighlight')}</span>
           </h2>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            Do primeiro esboço à entrega final, cada projeto é pensado para gerar resultado real.
+            {t('servicos.subtitle')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, i) => (
+          {services.map((service: any, i: number) => (
             <div key={i} className="service-card glass-card p-8 group cursor-default">
               <div className="text-4xl mb-4">{service.icon}</div>
               <h3 className="text-xl font-semibold text-text-primary mb-3 group-hover:gradient-text transition-all">
@@ -516,11 +515,7 @@ function Servicos() {
 }
 
 // ============================================================
-// PROJETOS
-// ============================================================
-// ============================================================
 // PROJECT IMAGE — Imagem estática com fallback de iniciais
-// Sem loading infinito — exibe imediatamente
 // ============================================================
 function ProjectImage({ src, alt, title }: { src: string; alt: string; title: string }) {
   const [hasError, setHasError] = useState(false);
@@ -548,8 +543,13 @@ function ProjectImage({ src, alt, title }: { src: string; alt: string; title: st
   );
 }
 
+// ============================================================
+// PROJETOS
+// ============================================================
 function Projetos() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { lang } = useContext(AppContext);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -574,12 +574,12 @@ function Projetos() {
     <section id="projetos" ref={sectionRef} className="section-padding bg-bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">Portfólio</p>
+          <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">{t('projetos.eyebrow')}</p>
           <h2 className="heading-lg mb-4">
-            Projetos <span className="gradient-text">recentes</span>
+            {t('projetos.title')} <span className="gradient-text">{t('projetos.titleHighlight')}</span>
           </h2>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            Cada projeto é uma parceria. Conheça alguns dos trabalhos que ajudamos a construir.
+            {t('projetos.subtitle')}
           </p>
         </div>
 
@@ -587,18 +587,18 @@ function Projetos() {
           <div className="empty-state-border p-12 md:p-20 text-center max-w-2xl mx-auto">
             <div className="text-5xl mb-6">✨</div>
             <h3 className="heading-md mb-4 text-text-primary">
-              Os primeiros projetos estão em construção.
+              {t('projetos.emptyState.title')}
             </h3>
             <p className="text-text-secondary text-lg mb-8">
-              Estamos preparando cases incríveis para mostrar aqui. Enquanto isso, que tal ser o próximo?
+              {t('projetos.emptyState.subtitle')}
             </p>
             <a
-              href={WHATSAPP_URL}
+              href={getWhatsAppUrl(lang)}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-shine inline-block px-8 py-4 rounded-full bg-gradient-to-r from-brand-indigo to-brand-cyan text-white font-semibold hover:opacity-90 transition-opacity"
             >
-              Quero ser o próximo — falar com o Arthur
+              {t('projetos.emptyState.cta')}
             </a>
           </div>
         ) : (
@@ -631,7 +631,7 @@ function Projetos() {
                   </h3>
                   <p className="text-text-secondary text-sm mb-4">{project.descricao}</p>
                   <span className="inline-flex items-center gap-1 text-brand-cyan text-sm font-medium">
-                    Ver projeto
+                    {t('projetos.verProjeto')}
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M3 11L11 3m0 0H5m6 0v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -652,13 +652,9 @@ function Projetos() {
 function Processo() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
-  const steps = [
-    { num: '01', title: 'Escuta', desc: 'Entender o negócio, o público e o objetivo.' },
-    { num: '02', title: 'Estratégia', desc: 'Definir escopo, estrutura e mensagens.' },
-    { num: '03', title: 'Criação', desc: 'Design + desenvolvimento + IA.' },
-    { num: '04', title: 'Revisão humana', desc: 'Cada detalhe analisado, testado e ajustado antes da entrega.' },
-  ];
+  const steps = t('processo.steps');
 
   useEffect(() => {
     if (!sectionRef.current || !lineRef.current) return;
@@ -695,9 +691,9 @@ function Processo() {
     <section ref={sectionRef} className="section-padding bg-bg-primary">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">Como trabalhamos</p>
+          <p className="text-brand-cyan text-sm uppercase tracking-wider mb-4">{t('processo.eyebrow')}</p>
           <h2 className="heading-lg">
-            Nosso <span className="gradient-text">processo</span>
+            {t('processo.title')} <span className="gradient-text">{t('processo.titleHighlight')}</span>
           </h2>
         </div>
 
@@ -707,7 +703,7 @@ function Processo() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6">
-            {steps.map((step, i) => (
+            {steps.map((step: any, i: number) => (
               <div key={i} className="process-step text-center md:text-left">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-brand-indigo to-brand-cyan text-white font-bold text-sm mb-4 relative z-10">
                   {step.num}
@@ -728,6 +724,8 @@ function Processo() {
 // ============================================================
 function Contato() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { lang } = useContext(AppContext);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -751,19 +749,19 @@ function Contato() {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="cta-animate heading-lg mb-6">
-          Sua empresa tem um potencial único. Vamos construir uma presença digital que o mundo consiga <span className="gradient-text">enxergar</span>?
+          {t('contato.title')} <span className="gradient-text">{t('contato.titleHighlight')}</span>?
         </h2>
         <p className="cta-animate text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          Cada projeto começa com escuta e parceria. Construir, junto com cada empresa, uma presença digital à altura do seu potencial.
+          {t('contato.subtitle')}
         </p>
         <div className="cta-animate flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href={WHATSAPP_URL}
+            href={getWhatsAppUrl(lang)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-shine px-10 py-4 rounded-full bg-gradient-to-r from-brand-indigo to-brand-cyan text-white font-semibold text-lg hover:opacity-90 transition-opacity"
           >
-            Chamar no WhatsApp
+            {t('contato.ctaWhatsapp')}
           </a>
           <a
             href={`mailto:${EMAIL}`}
@@ -781,6 +779,8 @@ function Contato() {
 // FOOTER
 // ============================================================
 function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="py-12 border-t border-white/5 bg-bg-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -791,7 +791,7 @@ function Footer() {
             </div>
             <div>
               <p className="text-text-primary font-medium text-sm">AC Studio — por Arthur Capozzi</p>
-              <p className="text-text-secondary text-xs">Inteligência para criar. Dedicação para transformar.</p>
+              <p className="text-text-secondary text-xs">{t('footer.slogan')}</p>
             </div>
           </div>
 
@@ -820,7 +820,7 @@ function Footer() {
 
         <div className="mt-8 pt-6 border-t border-white/5 text-center">
           <p className="text-text-secondary text-sm">
-            © 2026 AC Studio — por Arthur Capozzi. Feito com IA, design e revisão humana.
+            {t('footer.copyright')}
           </p>
         </div>
       </div>
@@ -833,6 +833,7 @@ function Footer() {
 // ============================================================
 function WhatsAppButton() {
   const [visible, setVisible] = useState(false);
+  const { lang } = useContext(AppContext);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -846,7 +847,7 @@ function WhatsAppButton() {
 
   return (
     <a
-      href={WHATSAPP_URL}
+      href={getWhatsAppUrl(lang)}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg whatsapp-pulse hover:scale-110 transition-transform"
@@ -862,7 +863,7 @@ function WhatsAppButton() {
 // ============================================================
 // MAIN APP
 // ============================================================
-export default function App() {
+function AppContent() {
   useEffect(() => {
     ScrollTrigger.refresh();
   }, []);
@@ -883,5 +884,13 @@ export default function App() {
       <Footer />
       <WhatsAppButton />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }

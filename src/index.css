@@ -2,19 +2,52 @@
 
 /* ============================================================
    AC Studio — Custom Styles
-   Dark mode elegante, estilo Apple
+   Dark/Light mode elegante, estilo Apple
    ============================================================ */
 
 @theme {
   --color-brand-indigo: #5E5CE6;
   --color-brand-cyan: #64D2FF;
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #0b0b0f;
-  --color-text-primary: #f5f5f7;
-  --color-text-secondary: #a1a1a6;
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-glass-bg: rgba(255, 255, 255, 0.03);
 }
+
+/* ============================================================
+   CSS Variables para Temas
+   ============================================================ */
+
+:root {
+  /* Dark mode (padrão) */
+  --bg-primary: #000000;
+  --bg-secondary: #0b0b0f;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+  --nav-bg: rgba(0, 0, 0, 0.6);
+  --nav-border: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="light"] {
+  /* Light mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.1);
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --nav-border: rgba(0, 0, 0, 0.06);
+}
+
+/* Classes utilitárias para cores dinâmicas */
+.bg-bg-primary { background-color: var(--bg-primary); }
+.bg-bg-secondary { background-color: var(--bg-secondary); }
+.text-text-primary { color: var(--text-primary); }
+.text-text-secondary { color: var(--text-secondary); }
+.border-white\/5 { border-color: var(--glass-border); }
+.border-white\/10 { border-color: var(--glass-border); }
+.border-white\/20 { border-color: var(--glass-border); }
 
 /* Base */
 * {
@@ -29,10 +62,16 @@ html {
 
 body {
   font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-  background-color: #000000;
-  color: #f5f5f7;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   overflow-x: hidden;
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Transição suave para todos os elementos com cores */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
 }
 
 /* Gradient text utility */
@@ -356,4 +395,202 @@ body {
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.3;
+}
+
+/* ============================================================
+   Theme Toggle & Language Selector
+   ============================================================ */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(94, 92, 230, 0.1);
+  border-color: rgba(94, 92, 230, 0.3);
+  transform: rotate(15deg);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #5E5CE6;
+  outline-offset: 2px;
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.lang-btn {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+  color: var(--text-primary);
+}
+
+.lang-btn.active {
+  background: linear-gradient(135deg, #5E5CE6, #64D2FF);
+  color: #ffffff;
+}
+
+.lang-btn:focus-visible {
+  outline: 2px solid #5E5CE6;
+  outline-offset: 2px;
+}
+
+.lang-separator {
+  color: var(--text-secondary);
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   Glass Card — Atualizado para temas
+   ============================================================ */
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-color 0.4s ease,
+              box-shadow 0.4s ease;
+}
+
+[data-theme="light"] .glass-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(94, 92, 230, 0.3);
+  box-shadow: 0 20px 60px -15px rgba(94, 92, 230, 0.15);
+}
+
+[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 8px 30px rgba(94, 92, 230, 0.1);
+}
+
+/* ============================================================
+   Navigation — Atualizado para temas
+   ============================================================ */
+
+.nav-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.nav-scrolled {
+  background-color: var(--nav-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: var(--nav-border);
+}
+
+/* ============================================================
+   Browser Window — Atualizado para temas
+   ============================================================ */
+
+.browser-window {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px -20px var(--glass-shadow),
+              0 0 60px -10px rgba(94, 92, 230, 0.1);
+}
+
+.browser-dots {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* ============================================================
+   Mobile Menu — Atualizado para temas
+   ============================================================ */
+
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+[data-theme="light"] .mobile-menu {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.mobile-menu.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ============================================================
+   Empty State — Atualizado para temas
+   ============================================================ */
+
+.empty-state-border {
+  border: 2px dashed var(--glass-border);
+  border-radius: 24px;
+}
+
+/* ============================================================
+   Tag Pill — Atualizado para temas
+   ============================================================ */
+
+.tag-pill {
+  background: rgba(94, 92, 230, 0.15);
+  border: 1px solid rgba(94, 92, 230, 0.3);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  color: #64D2FF;
+}
+
+[data-theme="light"] .tag-pill {
+  background: rgba(94, 92, 230, 0.1);
+  color: #5E5CE6;
 }

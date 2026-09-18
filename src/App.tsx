@@ -519,107 +519,31 @@ function Servicos() {
 // PROJETOS
 // ============================================================
 // ============================================================
-// PROJECT IMAGE — Componente robusto com timeout, retry e fallback
-// Resolve o problema do mShots "Generating Preview..." infinito
+// PROJECT IMAGE — Imagem estática com fallback de iniciais
+// Sem loading infinito — exibe imediatamente
 // ============================================================
-type ImageStatus = 'loading' | 'loaded' | 'timeout' | 'error';
-
 function ProjectImage({ src, alt, title }: { src: string; alt: string; title: string }) {
-  const [status, setStatus] = useState<ImageStatus>('loading');
-  const [retryKey, setRetryKey] = useState(0);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-
-  const TIMEOUT_MS = 12000; // 12 segundos — mShots costuma demorar 5-30s na 1ª geração
+  const [hasError, setHasError] = useState(false);
 
   const getInitials = (t: string) =>
     t.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
-  // Inicia timeout ao montar ou ao dar retry
-  useEffect(() => {
-    setStatus('loading');
-
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      // Se ainda estiver loading após o timeout, força fallback
-      setStatus((prev) => (prev === 'loading' ? 'timeout' : prev));
-    }, TIMEOUT_MS);
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [retryKey]);
-
-  const handleLoad = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    // Verifica se a imagem carregada é realmente o preview (e não o placeholder do mShots)
-    // O placeholder do mShots tem dimensões pequenas ou é uma imagem genérica
-    const img = imgRef.current;
-    if (img && img.naturalWidth > 0 && img.naturalHeight > 0) {
-      setStatus('loaded');
-    } else {
-      setStatus('error');
-    }
-  };
-
-  const handleError = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setStatus('error');
-  };
-
-  const handleRetry = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setRetryKey((k) => k + 1);
-  };
-
-  // Skeleton loading
-  if (status === 'loading') {
+  if (hasError) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-brand-indigo/10 to-brand-cyan/5">
-        <div className="relative w-12 h-12 mb-3">
-          <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-          <div className="absolute inset-0 rounded-full border-2 border-t-brand-cyan border-r-transparent border-b-transparent border-l-transparent animate-spin" />
-        </div>
-        <p className="text-text-secondary text-xs uppercase tracking-wider">Carregando preview…</p>
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-indigo/20 to-brand-cyan/10">
+        <span className="text-5xl font-bold gradient-text">{getInitials(title)}</span>
       </div>
     );
   }
 
-  // Timeout ou erro — mostra placeholder com retry
-  if (status === 'timeout' || status === 'error') {
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-brand-indigo/20 to-brand-cyan/10 p-6 text-center">
-        <span className="text-5xl font-bold gradient-text mb-3">{getInitials(title)}</span>
-        <p className="text-text-secondary text-xs mb-3">
-          {status === 'timeout' ? 'Preview indisponível no momento' : 'Falha ao carregar preview'}
-        </p>
-        <button
-          onClick={handleRetry}
-          className="text-brand-cyan text-xs font-medium hover:underline flex items-center gap-1"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 4v6h-6M1 20v-6h6" />
-            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-          </svg>
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  // Imagem carregada com sucesso
   return (
     <img
-      ref={imgRef}
-      key={retryKey}
       src={src}
       alt={alt}
       loading="lazy"
       decoding="async"
-      className="project-card-img w-full h-full object-cover"
-      onLoad={handleLoad}
-      onError={handleError}
+      className="project-preview-image"
+      onError={() => setHasError(true)}
     />
   );
 }

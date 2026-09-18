@@ -6,7 +6,7 @@ import PROJECTS from './data/projects';
 // ============================================================
 // ✏️ EDITAR AQUI: Configurações do site
 // ============================================================
-const WHATSAPP_NUMBER = '5511999999999'; // ✏️ EDITAR AQUI: número do WhatsApp
+const WHATSAPP_NUMBER = '5519995362190'; // ✏️ EDITAR AQUI: número do WhatsApp — +55 (19) 99536-2190
 const WHATSAPP_MESSAGE = encodeURIComponent('Olá, Arthur! Vim pelo site do AC Studio e quero conversar sobre um projeto.');
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 const EMAIL = 'contato@acstudio.com.br'; // ✏️ EDITAR AQUI: e-mail
